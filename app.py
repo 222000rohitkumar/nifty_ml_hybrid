@@ -169,7 +169,8 @@ with st.sidebar:
         with st.spinner("Connecting to NSE / Yahoo Finance..."):
             try:
                 from daily_updater import update_dataset
-                csv_path = "E:/fourth_sem/nifty_ml_hybrid/datasets/processed/nifty_engineered_features.csv"
+                # THE FIX: Relative path for the dataset
+                csv_path = "datasets/processed/nifty_engineered_features.csv"
                 update_dataset(csv_path)
                 st.toast("✅ Database Successfully Synced!", icon="📈")
             except Exception as e:
