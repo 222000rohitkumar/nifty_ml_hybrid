@@ -6,3 +6,10 @@ seaborn
 streamlit
 yfinance
 ipykernel
+statsmodels
+xgboost
+torch
+torchvision
+torchaudio
+yfinance
+transformers
