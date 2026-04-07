@@ -2,11 +2,16 @@
 # 🏦 NIFTY 50 Institutional Quant Desk
 **Regime-Conditioned Meta-Learner Architecture | Multi-Modal Sentiment Integration**
 
-![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
-![PyTorch](https://img.shields.io/badge/PyTorch-Deep_Learning-EE4C2C.svg)
-![XGBoost](https://img.shields.io/badge/XGBoost-Machine_Learning-1798c1.svg)
-![HuggingFace](https://img.shields.io/badge/Hugging_Face-FinBERT-FFD21E.svg)
-![Streamlit](https://img.shields.io/badge/Streamlit-Web_App-FF4B4B.svg)
+# 🏦 NIFTY 50 Institutional Quant Desk
+**Regime-Conditioned Meta-Learner Architecture | Multi-Modal Sentiment Integration**
+
+<p align="left">
+  <img src="https://img.shields.io/badge/Python-3.10-blue?style=flat-square&logo=python&logoColor=white" alt="Python" />
+  <img src="https://img.shields.io/badge/PyTorch-Deep_Learning-EE4C2C?style=flat-square&logo=pytorch&logoColor=white" alt="PyTorch" />
+  <img src="https://img.shields.io/badge/XGBoost-Machine_Learning-1798c1?style=flat-square" alt="XGBoost" />
+  <img src="https://img.shields.io/badge/Hugging_Face-FinBERT-FFD21E?style=flat-square&logo=huggingface&logoColor=black" alt="HuggingFace" />
+  <img src="https://img.shields.io/badge/Streamlit-Web_App-FF4B4B?style=flat-square&logo=streamlit&logoColor=white" alt="Streamlit" />
+</p>
 
 An institutional-grade Quantitative Analysis Dashboard designed to forecast the Indian NIFTY 50 Index. This project utilizes a hybrid deep-learning architecture, combining tabular microstructure data with sequential time-series tensors, topped with an AI-driven NLP sentiment overlay.
 
