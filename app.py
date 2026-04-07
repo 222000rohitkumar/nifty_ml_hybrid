@@ -100,7 +100,9 @@ st.markdown("""
 # --- 2. MODEL LOADING ---
 @st.cache_resource(show_spinner="Loading Deep Learning Models...")
 def load_all_models():
-    MODEL_DIR = "E:/fourth_sem/nifty_ml_hybrid/saved_models"
+    # THE FIX: Use relative paths so it works on any computer/server
+    MODEL_DIR = "saved_models"
+    
     xgb_model = xgb.XGBClassifier()
     xgb_model.load_model(f"{MODEL_DIR}/xgb_model.json")
     lstm_model = AttentionLSTM(input_dim=47, hidden_dim=64, num_layers=2, output_dim=2)
