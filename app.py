@@ -185,8 +185,8 @@ if run_forecast:
     my_bar = st.progress(0, text="Parsing Microstructure & Sequence Data...")
     try:
         live_data = get_market_data_for_date(
-            csv_path="E:/fourth_sem/nifty_ml_hybrid/datasets/processed/nifty_engineered_features.csv", 
-            scaler_path="E:/fourth_sem/nifty_ml_hybrid/saved_models/scaler.pkl",
+            csv_path="datasets/processed/nifty_engineered_features.csv", 
+            scaler_path="saved_models/scaler.pkl",
             target_date=str(selected_date)
         )
         my_bar.progress(40, text="Executing XGBoost Tabular Engine...")
