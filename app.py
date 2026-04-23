@@ -8,7 +8,7 @@ import datetime
 import time
 import textwrap
 import os
-from groq import Groq # --- ADDED GROQ IMPORT ---
+from groq import Groq 
 
 # --- IMPORTS FOR RAG/FINBERT ---
 from transformers import BertTokenizer, BertForSequenceClassification, pipeline
@@ -47,7 +47,7 @@ st.markdown("""
         border-right: 1px solid #1e293b !important;
     }
     
-    /* THE FIX: Target ONLY the headers and labels in the sidebar to be white. */
+    /* Target ONLY the headers and labels in the sidebar to be white. */
     [data-testid="stSidebar"] h3, 
     [data-testid="stSidebar"] label {
         color: #f8fafc !important;
@@ -94,6 +94,46 @@ st.markdown("""
     
     footer {visibility: hidden;}
     #MainMenu {visibility: hidden;}
+
+    /* --- GROQ CHAT VISIBILITY FIXES --- */
+    /* Force all text inside the chat to be a bright, readable off-white */
+    [data-testid="stChatMessageContent"], 
+    [data-testid="stChatMessageContent"] p, 
+    [data-testid="stChatMessageContent"] li, 
+    [data-testid="stChatMessageContent"] strong {
+        color: #f8fafc !important;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    /* Style the User's message bubble to stand out cleanly */
+    div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) {
+        background-color: #1e293b !important; /* Deep Slate Blue */
+        border: 1px solid #334155 !important;
+        border-radius: 10px;
+        padding: 10px;
+        margin-bottom: 15px;
+    }
+
+    /* Style the Assistant's (Groq) message bubble */
+    div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) {
+        background-color: transparent !important;
+        padding: 10px;
+        margin-bottom: 15px;
+    }
+
+    /* Keep the Chat Input Box white, but ensure the text typed inside is dark */
+    [data-testid="stChatInput"] {
+        background-color: #ffffff !important;
+        border-radius: 10px;
+    }
+    [data-testid="stChatInput"] textarea {
+        color: #0f172a !important; /* Dark text so you can read what you type */
+        background-color: #ffffff !important;
+    }
+    [data-testid="stChatInput"] button {
+        color: #0f172a !important; /* Dark send icon */
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -390,3 +430,6 @@ if st.session_state.meta_prob is not None:
                         st.rerun()
                     except Exception as e:
                         st.error(f"Error communicating with Groq API: {e}")
+
+else:
+    st.info("👈 System Ready. Please select a date and click 'Execute Quant Forecast' in the sidebar to generate the institutional report.")
