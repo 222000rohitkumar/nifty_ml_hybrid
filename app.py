@@ -7,6 +7,8 @@ import yfinance as yf
 import datetime
 import time
 import textwrap
+import os
+from groq import Groq # --- ADDED GROQ IMPORT ---
 
 # --- IMPORTS FOR RAG/FINBERT ---
 from transformers import BertTokenizer, BertForSequenceClassification, pipeline
@@ -25,7 +27,6 @@ st.set_page_config(
     initial_sidebar_state="expanded" 
 )
 
-# 🎨 PURE, CLEAN, PROFESSIONAL UI (TEXT FIX) 🎨
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap');
@@ -46,8 +47,7 @@ st.markdown("""
         border-right: 1px solid #1e293b !important;
     }
     
-    /* THE FIX: Target ONLY the headers and labels in the sidebar to be white. 
-       This leaves the buttons and text inputs alone so they stay readable! */
+    /* THE FIX: Target ONLY the headers and labels in the sidebar to be white. */
     [data-testid="stSidebar"] h3, 
     [data-testid="stSidebar"] label {
         color: #f8fafc !important;
@@ -100,7 +100,6 @@ st.markdown("""
 # --- 2. MODEL LOADING ---
 @st.cache_resource(show_spinner="Loading Deep Learning Models...")
 def load_all_models():
-    # THE FIX: Use relative paths so it works on any computer/server
     MODEL_DIR = "saved_models"
     
     xgb_model = xgb.XGBClassifier()
@@ -157,8 +156,11 @@ with header_col2:
         st.metric(label="", value=f"₹{live_price:,.2f}", delta=f"{change:,.2f} ({pct_change:.2f}%)")
 st.write("") 
 
+# Initialize session state variables
 if 'meta_prob' not in st.session_state:
     st.session_state.meta_prob = None
+if 'messages' not in st.session_state:
+    st.session_state.messages = [] # For Groq Chat history
 
 # --- 5. SIDEBAR CONTROLS ---
 with st.sidebar:
@@ -169,7 +171,6 @@ with st.sidebar:
         with st.spinner("Connecting to NSE / Yahoo Finance..."):
             try:
                 from daily_updater import update_dataset
-                # THE FIX: Relative path for the dataset
                 csv_path = "datasets/processed/nifty_engineered_features.csv"
                 update_dataset(csv_path)
                 st.toast("✅ Database Successfully Synced!", icon="📈")
@@ -179,6 +180,11 @@ with st.sidebar:
     selected_date = st.date_input("Select Trading Horizon", value=datetime.date.today(), key="unique_target_date")
     st.divider()
     run_forecast = st.button("🚀 Execute Quant Forecast", type="primary", use_container_width=True)
+    
+    st.divider()
+    if st.button("🗑️ Clear Chat History", use_container_width=True):
+        st.session_state.messages = []
+        st.rerun()
 
 # --- 6. CORE LOGIC EXECUTION ---
 if run_forecast:
@@ -287,6 +293,65 @@ if st.session_state.meta_prob is not None:
                 st.markdown(f"<div class='pro-box'><strong>Rationale:</strong> {rationale}</div>", unsafe_allow_html=True)
                 with st.expander("View Analyzed Headlines"):
                     st.markdown(news_summary)
+
+    st.divider()
+
+    # --- 8. GROQ CHATBOT INTEGRATION ---
+    st.markdown("<div class='section-header'>💬 Ask the Quant AI (Powered by Groq)</div>", unsafe_allow_html=True)
+    
+    # Try to initialize Groq Client
+    groq_api_key = st.secrets.get("GROQ_API_KEY", os.environ.get("GROQ_API_KEY"))
+    
+    if not groq_api_key:
+        st.warning("⚠️ Groq API key not found. Please add it to your `.streamlit/secrets.toml` file to enable the chat assistant.")
+    else:
+        client = Groq(api_key=groq_api_key)
+
+        # Dynamic System Prompt injecting current dashboard metrics
+        system_prompt = f"""You are a highly sophisticated Quantitative Analyst AI designed to explain an institutional trading dashboard. 
+        The user has just run a forecast on the NIFTY 50 index. 
+        Here is the current dashboard situation:
+        - Meta-Learner Confidence (Final Signal): {m_prob*100:.1f}% (Above 55% is Bullish, Below 45% is Bearish)
+        - XGBoost Confidence (Tabular Data): {st.session_state.xgb_p*100:.1f}%
+        - LSTM Confidence (Sequential Data): {st.session_state.lstm_p*100:.1f}%
+        - Macro Regime: {'Bullish (Above 200 SMA)' if live_data['regime_200'] == 1 else 'Bearish (Below 200 SMA)'}
+        - Volatility Quartile: {int(live_data['vol_quartile'])} (1 is lowest volatility, 4 is highest volatility)
+        
+        Answer the user's questions clearly, concisely, and professionally. Explain *why* the models might be outputting these specific numbers based on the regime and volatility. Do not use markdown LaTeX formulas unless specifically asked for mathematical equations.
+        """
+
+        # Display chat history
+        for message in st.session_state.messages:
+            if message["role"] != "system": # Don't display the hidden system prompt
+                with st.chat_message(message["role"]):
+                    st.markdown(message["content"])
+
+        # Accept user input
+        if prompt := st.chat_input("Ask me to explain the current metrics or the models..."):
+            # Add user message to chat history
+            st.session_state.messages.append({"role": "user", "content": prompt})
+            with st.chat_message("user"):
+                st.markdown(prompt)
+
+            # Build messages list for the API including the dynamic system prompt
+            api_messages = [{"role": "system", "content": system_prompt}] + st.session_state.messages
+
+            # Generate and display assistant response
+            with st.chat_message("assistant"):
+                with st.spinner("Analyzing..."):
+                    try:
+                        chat_completion = client.chat.completions.create(
+                            messages=api_messages,
+                            model="llama-3.1-8b-instant", # Extremely fast and smart Groq model
+                            temperature=0.5,
+                            max_tokens=1024,
+                        )
+                        response = chat_completion.choices[0].message.content
+                        st.markdown(response)
+                        # Add assistant response to chat history
+                        st.session_state.messages.append({"role": "assistant", "content": response})
+                    except Exception as e:
+                        st.error(f"Error communicating with Groq API: {e}")
+
 else:
     st.info("👈 System Ready. Please select a date and click 'Execute Quant Forecast' in the sidebar to generate the institutional report.")
-    
