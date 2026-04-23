@@ -296,7 +296,7 @@ if st.session_state.meta_prob is not None:
 
     st.divider()
 
-    # --- 8. GROQ CHATBOT INTEGRATION ---
+   # --- 8. GROQ CHATBOT INTEGRATION & DYNAMIC FOLLOW-UPS ---
     st.markdown("<div class='section-header'>💬 Ask the Quant AI (Powered by Groq)</div>", unsafe_allow_html=True)
     
     # Try to initialize Groq Client
@@ -317,38 +317,51 @@ if st.session_state.meta_prob is not None:
         - Macro Regime: {'Bullish (Above 200 SMA)' if live_data['regime_200'] == 1 else 'Bearish (Below 200 SMA)'}
         - Volatility Quartile: {int(live_data['vol_quartile'])} (1 is lowest volatility, 4 is highest volatility)
         
-        Answer the user's questions clearly, concisely, and professionally. Explain *why* the models might be outputting these specific numbers based on the regime and volatility. Do not use markdown LaTeX formulas unless specifically asked.
+        Answer the user's questions clearly, concisely, and professionally. Explain *why* the models might be outputting these specific numbers based on the regime and volatility.
         
         CRITICAL INSTRUCTION: At the end of EVERY response, you MUST provide 2-3 relevant follow-up questions the user could ask to explore the current data deeper. Format them exactly like this:
         
         **Suggested Follow-Ups:**
         * [Question 1]
         * [Question 2]
-        * [Question 3]
         """
 
         # Display chat history
         for message in st.session_state.messages:
-            if message["role"] != "system": # Don't display the hidden system prompt
+            if message["role"] != "system": 
                 with st.chat_message(message["role"]):
                     st.markdown(message["content"])
 
-        # --- QUICK STARTER BUTTONS (Only show if chat is empty) ---
+        # --- DYNAMIC FOLLOW-UP BUTTONS BASED ON MARKET CONDITIONS ---
+        # Only show these if the chat is empty
         if len(st.session_state.messages) == 0:
-            st.info("👋 Hi! I am your AI Quant Assistant. Ask me anything about the current dashboard, or choose a starter question below:")
-            q_col1, q_col2 = st.columns(2)
-            if q_col1.button("🧠 Explain today's Meta-Learner signal", use_container_width=True):
-                st.session_state.triggered_prompt = "Can you break down exactly why the Meta-Learner is outputting its current confidence score based on the XGBoost and LSTM outputs?"
-            if q_col2.button("📊 How is Volatility affecting this forecast?", use_container_width=True):
-                st.session_state.triggered_prompt = f"We are currently in Volatility Quartile {int(live_data['vol_quartile'])}. How does this specifically impact the models today?"
+            st.info("👋 The forecast is complete. Click a relevant question below to dive into the current market conditions:")
+            
+            # Generate condition-specific questions
+            regime_str = "Bullish" if live_data['regime_200'] == 1 else "Bearish"
+            vol_str = "High Volatility" if live_data['vol_quartile'] >= 3 else "Low Volatility"
+            
+            col_q1, col_q2, col_q3 = st.columns(3)
+            
+            # Question 1: Ties into the Meta-Learner Consensus
+            if col_q1.button(f"🧠 Why is the signal {direction}?", use_container_width=True):
+                st.session_state.triggered_prompt = f"Break down why the Meta-Learner is giving a {direction} signal at {m_prob*100:.1f}%. How much is it weighing the LSTM vs XGBoost right now?"
+            
+            # Question 2: Ties into the Regime and Volatility
+            if col_q2.button(f"📊 Explain the {regime_str} + {vol_str} impact", use_container_width=True):
+                st.session_state.triggered_prompt = f"We are currently in a {regime_str} regime with {vol_str} (Quartile {int(live_data['vol_quartile'])}). How does this specific environment historically affect the models?"
+                
+            # Question 3: Ties into model divergence (if any)
+            if col_q3.button("⚖️ Are the two base models agreeing?", use_container_width=True):
+                st.session_state.triggered_prompt = f"The XGBoost says {st.session_state.xgb_p*100:.1f}% and the LSTM says {st.session_state.lstm_p*100:.1f}%. Are they confirming each other or diverging, and what does that mean?"
 
-        # Accept user input from either the chat bar OR the starter buttons
+        # Accept user input from either the chat bar OR the dynamic buttons
         prompt = st.chat_input("Ask me to explain the current metrics or the models...")
         
-        # Override prompt if a starter button was clicked
+        # Override prompt if a dynamic button was clicked
         if 'triggered_prompt' in st.session_state:
             prompt = st.session_state.triggered_prompt
-            del st.session_state.triggered_prompt # Delete so it doesn't loop
+            del st.session_state.triggered_prompt # Delete so it doesn't loop endlessly
 
         if prompt:
             # Add user message to chat history
@@ -356,26 +369,24 @@ if st.session_state.meta_prob is not None:
             with st.chat_message("user"):
                 st.markdown(prompt)
 
-            # Build messages list for the API including the dynamic system prompt
+            # Build messages list for the API
             api_messages = [{"role": "system", "content": system_prompt}] + st.session_state.messages
 
             # Generate and display assistant response
             with st.chat_message("assistant"):
-                with st.spinner("Analyzing quantitative data..."):
+                with st.spinner("Analyzing market behavior..."):
                     try:
                         chat_completion = client.chat.completions.create(
                             messages=api_messages,
-                            model="llama-3.1-8b-instant", # Extremely fast Groq model
-                            temperature=0.5,
+                            model="llama-3.1-8b-instant",
+                            temperature=0.4,
                             max_tokens=1024,
                         )
                         response = chat_completion.choices[0].message.content
                         st.markdown(response)
                         
-                        # Add assistant response to chat history
                         st.session_state.messages.append({"role": "assistant", "content": response})
+                        # Force a rerun to hide the initial starter buttons once chat starts
+                        st.rerun()
                     except Exception as e:
                         st.error(f"Error communicating with Groq API: {e}")
-
-else:
-    st.info("👈 System Ready. Please select a date and click 'Execute Quant Forecast' in the sidebar to generate the institutional report.")
