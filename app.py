@@ -307,7 +307,7 @@ if st.session_state.meta_prob is not None:
     else:
         client = Groq(api_key=groq_api_key)
 
-        # Dynamic System Prompt injecting current dashboard metrics
+        # Dynamic System Prompt injecting current dashboard metrics + Follow-up Instructions
         system_prompt = f"""You are a highly sophisticated Quantitative Analyst AI designed to explain an institutional trading dashboard. 
         The user has just run a forecast on the NIFTY 50 index. 
         Here is the current dashboard situation:
@@ -317,7 +317,14 @@ if st.session_state.meta_prob is not None:
         - Macro Regime: {'Bullish (Above 200 SMA)' if live_data['regime_200'] == 1 else 'Bearish (Below 200 SMA)'}
         - Volatility Quartile: {int(live_data['vol_quartile'])} (1 is lowest volatility, 4 is highest volatility)
         
-        Answer the user's questions clearly, concisely, and professionally. Explain *why* the models might be outputting these specific numbers based on the regime and volatility. Do not use markdown LaTeX formulas unless specifically asked for mathematical equations.
+        Answer the user's questions clearly, concisely, and professionally. Explain *why* the models might be outputting these specific numbers based on the regime and volatility. Do not use markdown LaTeX formulas unless specifically asked.
+        
+        CRITICAL INSTRUCTION: At the end of EVERY response, you MUST provide 2-3 relevant follow-up questions the user could ask to explore the current data deeper. Format them exactly like this:
+        
+        **Suggested Follow-Ups:**
+        * [Question 1]
+        * [Question 2]
+        * [Question 3]
         """
 
         # Display chat history
@@ -326,8 +333,24 @@ if st.session_state.meta_prob is not None:
                 with st.chat_message(message["role"]):
                     st.markdown(message["content"])
 
-        # Accept user input
-        if prompt := st.chat_input("Ask me to explain the current metrics or the models..."):
+        # --- QUICK STARTER BUTTONS (Only show if chat is empty) ---
+        if len(st.session_state.messages) == 0:
+            st.info("👋 Hi! I am your AI Quant Assistant. Ask me anything about the current dashboard, or choose a starter question below:")
+            q_col1, q_col2 = st.columns(2)
+            if q_col1.button("🧠 Explain today's Meta-Learner signal", use_container_width=True):
+                st.session_state.triggered_prompt = "Can you break down exactly why the Meta-Learner is outputting its current confidence score based on the XGBoost and LSTM outputs?"
+            if q_col2.button("📊 How is Volatility affecting this forecast?", use_container_width=True):
+                st.session_state.triggered_prompt = f"We are currently in Volatility Quartile {int(live_data['vol_quartile'])}. How does this specifically impact the models today?"
+
+        # Accept user input from either the chat bar OR the starter buttons
+        prompt = st.chat_input("Ask me to explain the current metrics or the models...")
+        
+        # Override prompt if a starter button was clicked
+        if 'triggered_prompt' in st.session_state:
+            prompt = st.session_state.triggered_prompt
+            del st.session_state.triggered_prompt # Delete so it doesn't loop
+
+        if prompt:
             # Add user message to chat history
             st.session_state.messages.append({"role": "user", "content": prompt})
             with st.chat_message("user"):
@@ -338,16 +361,17 @@ if st.session_state.meta_prob is not None:
 
             # Generate and display assistant response
             with st.chat_message("assistant"):
-                with st.spinner("Analyzing..."):
+                with st.spinner("Analyzing quantitative data..."):
                     try:
                         chat_completion = client.chat.completions.create(
                             messages=api_messages,
-                            model="llama-3.1-8b-instant", # Extremely fast and smart Groq model
+                            model="llama-3.1-8b-instant", # Extremely fast Groq model
                             temperature=0.5,
                             max_tokens=1024,
                         )
                         response = chat_completion.choices[0].message.content
                         st.markdown(response)
+                        
                         # Add assistant response to chat history
                         st.session_state.messages.append({"role": "assistant", "content": response})
                     except Exception as e:
