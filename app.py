@@ -78,7 +78,7 @@ st.markdown("""
     
     [data-testid="baseButton-secondary"]:hover {
         background-color: #1e293b !important;
-        border-color: #3b82f6 !important; 
+        border-color: #3b82f6 !important; /* Subtle blue glow on hover */
         color: #ffffff !important;
     }
 
@@ -133,6 +133,7 @@ st.markdown("""
         line-height: 1.6;
     }
 
+    /* User's message bubble */
     div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) {
         background-color: #1e293b !important;
         border: 1px solid #334155 !important;
@@ -141,6 +142,7 @@ st.markdown("""
         margin-bottom: 15px;
     }
 
+    /* AI's message container */
     div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) {
         background-color: transparent !important;
         padding: 10px;
@@ -150,24 +152,30 @@ st.markdown("""
     /* =========================================================
        6. CHAT INPUT BOX FIX (Making it dark & readable)
        ========================================================= */
-    /* Target the actual inner container of the chat box */
+    /* Target the container wrapping the chat box */
+    [data-testid="stChatInput"] {
+        background-color: #0A0E17 !important; 
+    }
+    /* Target the actual input box */
     [data-testid="stChatInput"] > div {
-        background-color: #1e293b !important; /* Deep Slate Box */
+        background-color: #1e293b !important; /* Deep slate background */
         border: 1px solid #334155 !important;
-        border-radius: 10px;
+        border-radius: 10px !important;
     }
-    /* The text you type */
+    /* Target the text you type inside the box */
     [data-testid="stChatInput"] textarea {
-        color: #f8fafc !important; /* White text when typing */
-        -webkit-text-fill-color: #f8fafc !important; /* Force text color in Safari/Chrome */
+        color: #f8fafc !important; /* Bright white text */
+        -webkit-text-fill-color: #f8fafc !important; /* Force color in Chrome/Safari */
+        caret-color: #f8fafc !important; /* White blinking cursor */
     }
-    /* Placeholder text */
+    /* Target the placeholder text */
     [data-testid="stChatInput"] textarea::placeholder {
-        color: #94a3b8 !important; 
+        color: #94a3b8 !important; /* Muted grey placeholder */
+        -webkit-text-fill-color: #94a3b8 !important;
     }
-    /* Send button icon */
+    /* Target the send button arrow */
     [data-testid="stChatInput"] svg {
-        fill: #f8fafc !important; /* Make the send arrow white */
+        fill: #f8fafc !important; 
     }
 
     /* =========================================================
@@ -183,6 +191,9 @@ st.markdown("""
         background-color: #1e293b !important;
         color: #f8fafc !important;
     }
+    [data-testid="stExpander"] summary:hover {
+        background-color: #334155 !important;
+    }
     [data-testid="stExpander"] summary p {
         color: #f8fafc !important;
         font-weight: 600 !important;
@@ -195,6 +206,7 @@ st.markdown("""
     [data-testid="stExpanderDetails"] li, 
     [data-testid="stExpanderDetails"] span {
         color: #cbd5e1 !important; /* Crisp, light slate text */
+        line-height: 1.6 !important;
     }
 
     footer {visibility: hidden;}
