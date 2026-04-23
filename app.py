@@ -68,7 +68,6 @@ st.markdown("""
     /* =========================================================
        3. BUTTON STYLING (Making white buttons dark & sleek)
        ========================================================= */
-    /* Target all secondary buttons (Chat starters, Sync, Clear Chat) */
     [data-testid="baseButton-secondary"] {
         background-color: #111827 !important;
         color: #cbd5e1 !important;
@@ -79,7 +78,7 @@ st.markdown("""
     
     [data-testid="baseButton-secondary"]:hover {
         background-color: #1e293b !important;
-        border-color: #3b82f6 !important; /* Subtle blue glow on hover */
+        border-color: #3b82f6 !important; 
         color: #ffffff !important;
     }
 
@@ -125,7 +124,6 @@ st.markdown("""
     /* =========================================================
        5. GROQ CHAT VISIBILITY FIXES
        ========================================================= */
-    /* Force AI text to be readable off-white */
     [data-testid="stChatMessageContent"], 
     [data-testid="stChatMessageContent"] p, 
     [data-testid="stChatMessageContent"] li, 
@@ -135,7 +133,6 @@ st.markdown("""
         line-height: 1.6;
     }
 
-    /* User's message bubble */
     div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) {
         background-color: #1e293b !important;
         border: 1px solid #334155 !important;
@@ -144,32 +141,60 @@ st.markdown("""
         margin-bottom: 15px;
     }
 
-    /* AI's message container */
     div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) {
         background-color: transparent !important;
         padding: 10px;
         margin-bottom: 15px;
     }
 
-    /* Bottom Input Box Styling */
-    [data-testid="stChatInput"] {
-        background-color: #111827 !important; /* Deep Slate Box */
+    /* =========================================================
+       6. CHAT INPUT BOX FIX (Making it dark & readable)
+       ========================================================= */
+    /* Target the actual inner container of the chat box */
+    [data-testid="stChatInput"] > div {
+        background-color: #1e293b !important; /* Deep Slate Box */
         border: 1px solid #334155 !important;
         border-radius: 10px;
     }
+    /* The text you type */
     [data-testid="stChatInput"] textarea {
         color: #f8fafc !important; /* White text when typing */
-        background-color: transparent !important;
+        -webkit-text-fill-color: #f8fafc !important; /* Force text color in Safari/Chrome */
     }
+    /* Placeholder text */
     [data-testid="stChatInput"] textarea::placeholder {
-        color: #64748b !important; /* Muted grey placeholder */
+        color: #94a3b8 !important; 
     }
-    [data-testid="stChatInput"] button {
-        color: #f8fafc !important; /* White send button */
-        background-color: transparent !important;
+    /* Send button icon */
+    [data-testid="stChatInput"] svg {
+        fill: #f8fafc !important; /* Make the send arrow white */
     }
-    [data-testid="stChatInput"] button:hover {
+
+    /* =========================================================
+       7. EXPANDER FIX (View Analyzed Headlines)
+       ========================================================= */
+    [data-testid="stExpander"] {
+        background-color: #111827 !important;
+        border: 1px solid #1e293b !important;
+        border-radius: 8px !important;
+        overflow: hidden;
+    }
+    [data-testid="stExpander"] summary {
         background-color: #1e293b !important;
+        color: #f8fafc !important;
+    }
+    [data-testid="stExpander"] summary p {
+        color: #f8fafc !important;
+        font-weight: 600 !important;
+    }
+    [data-testid="stExpanderDetails"] {
+        background-color: #0A0E17 !important;
+        padding: 15px !important;
+    }
+    [data-testid="stExpanderDetails"] p, 
+    [data-testid="stExpanderDetails"] li, 
+    [data-testid="stExpanderDetails"] span {
+        color: #cbd5e1 !important; /* Crisp, light slate text */
     }
 
     footer {visibility: hidden;}
