@@ -31,29 +31,61 @@ st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap');
     
-    /* Solid, premium dark background */
-    .stApp {
-        background-color: #0A0E17 !important;
-    }
-
     /* Force Inter font safely WITHOUT breaking Streamlit icons */
     html, body, p, h1, h2, h3, h4, h5, h6, label, .pro-box {
         font-family: 'Inter', sans-serif !important;
     }
 
-    /* Force the Sidebar to be Dark Mode to match the app */
+    /* =========================================================
+       1. CORE BACKGROUND FIXES (Eliminating the White Gaps)
+       ========================================================= */
+    .stApp, 
+    [data-testid="stAppViewContainer"], 
+    [data-testid="stHeader"], 
+    [data-testid="stBottomBlockContainer"], 
+    [data-testid="stBottom"] {
+        background-color: #0A0E17 !important;
+    }
+
+    /* Remove the red/colorful decoration line at the very top of the header */
+    header[data-testid="stHeader"]::before {
+        background-color: transparent !important;
+    }
+
+    /* =========================================================
+       2. SIDEBAR STYLING
+       ========================================================= */
     [data-testid="stSidebar"] {
         background-color: #111827 !important;
         border-right: 1px solid #1e293b !important;
     }
     
-    /* Target ONLY the headers and labels in the sidebar to be white. */
     [data-testid="stSidebar"] h3, 
     [data-testid="stSidebar"] label {
         color: #f8fafc !important;
     }
 
-    /* Clean Title Styling */
+    /* =========================================================
+       3. BUTTON STYLING (Making white buttons dark & sleek)
+       ========================================================= */
+    /* Target all secondary buttons (Chat starters, Sync, Clear Chat) */
+    [data-testid="baseButton-secondary"] {
+        background-color: #111827 !important;
+        color: #cbd5e1 !important;
+        border: 1px solid #1e293b !important;
+        border-radius: 8px;
+        transition: all 0.2s ease-in-out;
+    }
+    
+    [data-testid="baseButton-secondary"]:hover {
+        background-color: #1e293b !important;
+        border-color: #3b82f6 !important; /* Subtle blue glow on hover */
+        color: #ffffff !important;
+    }
+
+    /* =========================================================
+       4. TYPOGRAPHY & METRICS CARDS
+       ========================================================= */
     .main-title {
         font-size: 2.2rem;
         font-weight: 800;
@@ -68,7 +100,6 @@ st.markdown("""
         font-weight: 500;
     }
 
-    /* Metric Cards - Sleek, distinct */
     div[data-testid="metric-container"] {
         background-color: #111827;
         border: 1px solid #1e293b;
@@ -81,7 +112,6 @@ st.markdown("""
         transform: translateY(-3px);
     }
 
-    /* Clean Subheaders for the bottom sections */
     .section-header {
         font-size: 1.25rem;
         font-weight: 600;
@@ -91,12 +121,11 @@ st.markdown("""
         align-items: center;
         gap: 8px;
     }
-    
-    footer {visibility: hidden;}
-    #MainMenu {visibility: hidden;}
 
-    /* --- GROQ CHAT VISIBILITY FIXES --- */
-    /* Force all text inside the chat to be a bright, readable off-white */
+    /* =========================================================
+       5. GROQ CHAT VISIBILITY FIXES
+       ========================================================= */
+    /* Force AI text to be readable off-white */
     [data-testid="stChatMessageContent"], 
     [data-testid="stChatMessageContent"] p, 
     [data-testid="stChatMessageContent"] li, 
@@ -106,34 +135,45 @@ st.markdown("""
         line-height: 1.6;
     }
 
-    /* Style the User's message bubble to stand out cleanly */
+    /* User's message bubble */
     div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) {
-        background-color: #1e293b !important; /* Deep Slate Blue */
+        background-color: #1e293b !important;
         border: 1px solid #334155 !important;
         border-radius: 10px;
         padding: 10px;
         margin-bottom: 15px;
     }
 
-    /* Style the Assistant's (Groq) message bubble */
+    /* AI's message container */
     div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) {
         background-color: transparent !important;
         padding: 10px;
         margin-bottom: 15px;
     }
 
-    /* Keep the Chat Input Box white, but ensure the text typed inside is dark */
+    /* Bottom Input Box Styling */
     [data-testid="stChatInput"] {
-        background-color: #ffffff !important;
+        background-color: #111827 !important; /* Deep Slate Box */
+        border: 1px solid #334155 !important;
         border-radius: 10px;
     }
     [data-testid="stChatInput"] textarea {
-        color: #0f172a !important; /* Dark text so you can read what you type */
-        background-color: #ffffff !important;
+        color: #f8fafc !important; /* White text when typing */
+        background-color: transparent !important;
+    }
+    [data-testid="stChatInput"] textarea::placeholder {
+        color: #64748b !important; /* Muted grey placeholder */
     }
     [data-testid="stChatInput"] button {
-        color: #0f172a !important; /* Dark send icon */
+        color: #f8fafc !important; /* White send button */
+        background-color: transparent !important;
     }
+    [data-testid="stChatInput"] button:hover {
+        background-color: #1e293b !important;
+    }
+
+    footer {visibility: hidden;}
+    #MainMenu {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
 
