@@ -78,7 +78,7 @@ st.markdown("""
     
     [data-testid="baseButton-secondary"]:hover {
         background-color: #1e293b !important;
-        border-color: #3b82f6 !important; /* Subtle blue glow on hover */
+        border-color: #3b82f6 !important; 
         color: #ffffff !important;
     }
 
@@ -133,7 +133,6 @@ st.markdown("""
         line-height: 1.6;
     }
 
-    /* User's message bubble */
     div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) {
         background-color: #1e293b !important;
         border: 1px solid #334155 !important;
@@ -142,7 +141,6 @@ st.markdown("""
         margin-bottom: 15px;
     }
 
-    /* AI's message container */
     div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) {
         background-color: transparent !important;
         padding: 10px;
@@ -150,32 +148,32 @@ st.markdown("""
     }
 
     /* =========================================================
-       6. CHAT INPUT BOX FIX (Making it dark & readable)
+       6. CHAT INPUT BOX FIX (White Box, Black Text)
        ========================================================= */
-    /* Target the container wrapping the chat box */
+    /* Target the container wrapping the chat box to keep it dark */
     [data-testid="stChatInput"] {
         background-color: #0A0E17 !important; 
     }
-    /* Target the actual input box */
+    /* Target the actual input box - Make it White */
     [data-testid="stChatInput"] > div {
-        background-color: #1e293b !important; /* Deep slate background */
-        border: 1px solid #334155 !important;
+        background-color: #ffffff !important; 
+        border: 1px solid #cbd5e1 !important;
         border-radius: 10px !important;
     }
-    /* Target the text you type inside the box */
+    /* Target the text you type inside the box - Make it Black */
     [data-testid="stChatInput"] textarea {
-        color: #f8fafc !important; /* Bright white text */
-        -webkit-text-fill-color: #f8fafc !important; /* Force color in Chrome/Safari */
-        caret-color: #f8fafc !important; /* White blinking cursor */
+        color: #000000 !important; 
+        -webkit-text-fill-color: #000000 !important; 
+        caret-color: #000000 !important; /* Black blinking cursor */
     }
-    /* Target the placeholder text */
+    /* Target the placeholder text - Make it dark grey */
     [data-testid="stChatInput"] textarea::placeholder {
-        color: #94a3b8 !important; /* Muted grey placeholder */
-        -webkit-text-fill-color: #94a3b8 !important;
+        color: #475569 !important; 
+        -webkit-text-fill-color: #475569 !important;
     }
-    /* Target the send button arrow */
+    /* Target the send button arrow - Make it Black */
     [data-testid="stChatInput"] svg {
-        fill: #f8fafc !important; 
+        fill: #000000 !important; 
     }
 
     /* =========================================================
