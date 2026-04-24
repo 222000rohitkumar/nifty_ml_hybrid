@@ -14,3 +14,4 @@ torchaudio
 yfinance
 transformers
 groq
+plotly
