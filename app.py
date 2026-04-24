@@ -9,6 +9,8 @@ import time
 import textwrap
 import os
 from groq import Groq 
+import pandas as pd # --- ADDED FOR CHART ---
+import plotly.graph_objects as go # --- ADDED FOR CHART ---
 
 # --- IMPORTS FOR RAG/FINBERT ---
 from transformers import BertTokenizer, BertForSequenceClassification, pipeline
@@ -150,28 +152,23 @@ st.markdown("""
     /* =========================================================
        6. CHAT INPUT BOX FIX (White Box, Black Text)
        ========================================================= */
-    /* Target the container wrapping the chat box to keep it dark */
     [data-testid="stChatInput"] {
         background-color: #0A0E17 !important; 
     }
-    /* Target the actual input box - Make it White */
     [data-testid="stChatInput"] > div {
         background-color: #ffffff !important; 
         border: 1px solid #cbd5e1 !important;
         border-radius: 10px !important;
     }
-    /* Target the text you type inside the box - Make it Black */
     [data-testid="stChatInput"] textarea {
         color: #000000 !important; 
         -webkit-text-fill-color: #000000 !important; 
-        caret-color: #000000 !important; /* Black blinking cursor */
+        caret-color: #000000 !important; 
     }
-    /* Target the placeholder text - Make it dark grey */
     [data-testid="stChatInput"] textarea::placeholder {
         color: #475569 !important; 
         -webkit-text-fill-color: #475569 !important;
     }
-    /* Target the send button arrow - Make it Black */
     [data-testid="stChatInput"] svg {
         fill: #000000 !important; 
     }
@@ -203,8 +200,20 @@ st.markdown("""
     [data-testid="stExpanderDetails"] p, 
     [data-testid="stExpanderDetails"] li, 
     [data-testid="stExpanderDetails"] span {
-        color: #cbd5e1 !important; /* Crisp, light slate text */
+        color: #cbd5e1 !important; 
         line-height: 1.6 !important;
+    }
+
+    /* =========================================================
+       8. CHART CONTAINER
+       ========================================================= */
+    .chart-container {
+        border: 1px solid #1e293b;
+        border-radius: 10px;
+        background-color: #111827;
+        padding: 15px;
+        margin-top: 20px;
+        margin-bottom: 25px;
     }
 
     footer {visibility: hidden;}
@@ -233,7 +242,7 @@ def load_finbert():
     model = BertForSequenceClassification.from_pretrained(model_name)
     return pipeline("sentiment-analysis", model=model, tokenizer=tokenizer)
 
-# --- 3. LIVE MARKET FETCHER ---
+# --- 3. LIVE MARKET FETCHER & CHART DATA ---
 @st.cache_data(ttl=60)
 def get_live_nifty_price():
     try:
@@ -248,6 +257,16 @@ def get_live_nifty_price():
         return None, None, None
     except Exception:
         return None, None, None
+
+@st.cache_data(ttl=3600)
+def get_historical_chart_data():
+    try:
+        nifty = yf.Ticker("^NSEI")
+        df = nifty.history(period="1y") # Fetch 1 year to show the 200 SMA
+        df['200_SMA'] = df['Close'].rolling(window=200).mean()
+        return df
+    except Exception:
+        return None
 
 # Load all models
 try:
@@ -383,7 +402,41 @@ if st.session_state.meta_prob is not None:
     col3.metric(label="LSTM Edge", value=f"{st.session_state.lstm_p*100:.1f}%", delta="Sequential", delta_color="off")
     col4.metric(label="Macro Regime", value=regime_text, delta=f"Vol Quartile: {int(live_data['vol_quartile'])}", delta_color="off")
     
-    st.write("") 
+    # --- NEW: PLOTLY INTERACTIVE CHART ---
+    chart_df = get_historical_chart_data()
+    if chart_df is not None:
+        st.markdown("<div class='chart-container'>", unsafe_allow_html=True)
+        st.markdown("<div style='color: #f8fafc; font-weight: 600; margin-bottom: 5px; padding-left: 10px; font-size: 1.1rem;'>📈 NIFTY 50 Market Structure & Regime Analysis</div>", unsafe_allow_html=True)
+        
+        fig = go.Figure()
+        
+        # Candlestick Trace
+        fig.add_trace(go.Candlestick(
+            x=chart_df.index, open=chart_df['Open'], high=chart_df['High'], low=chart_df['Low'], close=chart_df['Close'],
+            name='NIFTY 50', increasing_line_color='#10b981', decreasing_line_color='#ef4444'
+        ))
+        
+        # 200 SMA Trace
+        fig.add_trace(go.Scatter(
+            x=chart_df.index, y=chart_df['200_SMA'], mode='lines', 
+            name='200-Day SMA (Regime Divider)', line=dict(color='#f59e0b', width=2, dash='solid')
+        ))
+        
+        # Make the chart background transparent to blend with Streamlit Dark Mode
+        fig.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            margin=dict(l=0, r=0, t=20, b=0),
+            height=400,
+            xaxis_rangeslider_visible=False,
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, font=dict(color='#cbd5e1'))
+        )
+        fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='#1e293b', tickfont=dict(color='#cbd5e1'))
+        fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='#1e293b', tickfont=dict(color='#cbd5e1'))
+        
+        st.plotly_chart(fig, use_container_width=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+    
     st.write("") 
     
     main_col1, main_col2 = st.columns([1, 1], gap="large")
