@@ -78,7 +78,7 @@ nifty_ml_hybrid/
 
 **1. Clone the repository**
 ```bash
-git clone [https://github.com/YourUsername/nifty-quant-desk.git](https://github.com/YourUsername/nifty-quant-desk.git)
+git clone https://github.com/222000rohitkumar/nifty_ml_hybrid/
 cd nifty-quant-desk
 ```
 
@@ -119,7 +119,7 @@ This app is optimized for deployment on Streamlit Community Cloud.
 ***
 
 ### How to use this:
-1. Replace `YourUsername` in the **Installation** section with your actual GitHub username.
+1. Replace `222000rohitkumar` in the **Installation** section with your actual GitHub username.
 2. Commit this to your repository. 
 
 When you look at your GitHub page, it will now render with beautiful colored badges at the top, clean code blocks, and a highly professional layout that perfectly explains exactly what your complex architecture is doing.
